@@ -35,4 +35,6 @@
 /.distignore
 /.gitignore
 /.gitattributes
+/README.md
+/CONTRIBUTING.md
 /*.zip
