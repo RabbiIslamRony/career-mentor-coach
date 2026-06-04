@@ -1,0 +1,55 @@
+name: Build WordPress theme release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build theme zip
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          slug="career-mentor-coach"
+          version="${GITHUB_REF_NAME#v}"
+          zip_name="${slug}.${version}.zip"
+
+          rm -rf dist "$zip_name"
+          mkdir -p "dist/$slug"
+          rsync -a --delete --exclude-from=.distignore ./ "dist/$slug/"
+          (cd dist && zip -qr "../$zip_name" "$slug")
+
+          echo "ZIP_NAME=$zip_name" >> "$GITHUB_ENV"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wordpress-theme-zip
+          path: ${{ env.ZIP_NAME }}
+
+      - name: Attach zip to GitHub release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
+            gh release create "$GITHUB_REF_NAME" \
+              --title "$GITHUB_REF_NAME" \
+              --notes "Career Mentor Coach theme release $GITHUB_REF_NAME"
+
+          gh release upload "$GITHUB_REF_NAME" "$ZIP_NAME" --clobber
