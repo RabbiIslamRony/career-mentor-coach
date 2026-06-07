@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version without the v prefix, for example 1.0.2"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -17,13 +22,44 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate release metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            version="${{ inputs.version }}"
+          fi
+
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid release version: $version" >&2
+            exit 1
+          fi
+
+          perl -0pi -e "s/^Version:\\s*.*/Version: $version/m" style.css style-rtl.css
+          perl -0pi -e "s/^Stable tag:\\s*.*/Stable tag: $version/m" readme.txt
+
+          grep -q '^Requires at least: 6.9$' style.css
+          grep -q '^Tested up to: 7.0$' style.css
+          grep -q '^Tested up to: 7.0$' readme.txt
+          ! grep -R -n -E 'option_blogname|option_blogdescription|get_custom_logo|Assets_Manager|assets-manager' functions.php inc parts patterns styles templates assets theme.json style.css style-rtl.css readme.txt
+          grep -q 'href="#content"' patterns/pattern-header.php
+
+          for template in templates/*.html; do
+            grep -q 'id="content"' "$template"
+          done
+
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+
       - name: Build theme zip
         shell: bash
         run: |
           set -euo pipefail
 
           slug="career-mentor-coach"
-          version="${GITHUB_REF_NAME#v}"
+          version="$RELEASE_VERSION"
           zip_name="${slug}.${version}.zip"
 
           rm -rf dist "$zip_name"

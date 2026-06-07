@@ -34,6 +34,10 @@ Perfect for:
 = 1.0.2 =
 * Added the official WordPress.org theme URI.
 * Added GitHub contribution documentation.
+* Added six reusable career coaching block patterns.
+* Added career roadmap, lead magnet, case study, package comparison, FAQ, and trust strip layouts.
+* Confirmed WordPress 7.0 compatibility metadata.
+* Added release workflow checks for theme packaging and review feedback regressions.
 
 = 1.0.1 =
 * Added a valid skip-link target across templates.

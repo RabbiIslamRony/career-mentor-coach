@@ -60,17 +60,19 @@ Before opening a pull request, test:
 For maintainers preparing a new release:
 
 1. Update `Version` in `style.css`.
-2. Update `Stable tag` and changelog in `readme.txt`.
-3. Commit the release changes.
-4. Create and push a version tag:
+2. Update `Version` in `style-rtl.css`.
+3. Update `Stable tag` and changelog in `readme.txt`.
+4. Commit the release changes.
+5. Create and push a version tag only after maintainer confirmation. The release workflow also syncs the packaged ZIP metadata from the tag to prevent stale package versions:
 
 ```bash
-git tag -a v1.0.2 -m "Career Mentor Coach 1.0.2"
-git push origin main v1.0.2
+git tag -a vX.Y.Z -m "Career Mentor Coach X.Y.Z"
+git push origin main vX.Y.Z
 ```
 
-5. Confirm the GitHub Actions release ZIP is attached to the GitHub release.
-6. Submit or sync the release to WordPress.org through the normal theme workflow.
+6. Do not delete, recreate, or push release tags until the maintainer confirms the release path.
+7. Confirm the GitHub Actions release ZIP is attached to the GitHub release.
+8. Submit or sync the release to WordPress.org through the normal theme workflow.
 
 ## Pull Request Notes
 
