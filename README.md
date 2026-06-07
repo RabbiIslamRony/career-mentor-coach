@@ -37,7 +37,7 @@ The workflow syncs the packaged theme version from the tag name, so a `vX.Y.Z` t
 
 The GitHub release ZIP still needs to be submitted to WordPress.org through the theme update workflow unless a separate WordPress.org SVN deployment workflow is configured with secure credentials.
 
-The `v1.0.2` tag already exists in this repository. Do not delete, recreate, or push release tags until the maintainer confirms the release path.
+The WordPress.org release target is `1.0.2`. The GitHub `v1.0.2` tag already exists in this repository, so do not delete, recreate, or push that tag unless the maintainer explicitly approves replacing the existing tag.
 
 Use this pattern for future confirmed releases:
 
