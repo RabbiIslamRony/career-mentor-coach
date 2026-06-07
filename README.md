@@ -35,9 +35,20 @@ Official WordPress.org theme page: https://wordpress.org/themes/career-mentor-co
 The repository includes a GitHub Actions workflow that builds a clean WordPress theme ZIP whenever a version tag is pushed.
 The workflow syncs the packaged theme version from the tag name, so a `vX.Y.Z` tag produces a ZIP with `Version: X.Y.Z` and `Stable tag: X.Y.Z`.
 
-The GitHub release ZIP still needs to be submitted to WordPress.org through the theme update workflow unless a separate WordPress.org SVN deployment workflow is configured with secure credentials.
+The GitHub release ZIP can be submitted manually to WordPress.org, or the approved version can be deployed through the WordPress.org SVN workflow once secure credentials are configured.
 
-The WordPress.org release target is `1.0.2`. The GitHub `v1.0.2` tag already exists in this repository, so do not delete, recreate, or push that tag unless the maintainer explicitly approves replacing the existing tag.
+The WordPress.org release target is `1.0.2`. The GitHub `v1.0.2` tag has been replaced with the approved `main` release commit.
+
+## WordPress.org SVN Deploy
+
+After the theme is approved on WordPress.org, updates can be deployed to `https://themes.svn.wordpress.org/career-mentor-coach/` with the `Deploy WordPress.org theme SVN` workflow.
+
+Required GitHub repository secrets:
+
+- `SVN_USERNAME`: WordPress.org username with commit access to the theme.
+- `SVN_PASSWORD`: WordPress.org password for that account.
+
+For the current WordPress.org release target, run the workflow manually with version `1.0.2`. For future releases, merge the release commit to `main`, tag the version, and the workflow can deploy the matching version directory to SVN.
 
 Use this pattern for future confirmed releases:
 

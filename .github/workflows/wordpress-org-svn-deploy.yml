@@ -1,0 +1,117 @@
+name: Deploy WordPress.org theme SVN
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Theme version without the v prefix, for example 1.0.2"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve release version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            version="${{ inputs.version }}"
+          fi
+
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid release version: $version" >&2
+            exit 1
+          fi
+
+          style_version="$(awk -F': ' '/^Version:/ { print $2; exit }' style.css)"
+          stable_tag="$(awk -F': ' '/^Stable tag:/ { print $2; exit }' readme.txt)"
+
+          test "$style_version" = "$version"
+          test "$stable_tag" = "$version"
+
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Install SVN tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          sudo apt-get update
+          sudo apt-get install -y rsync subversion
+
+      - name: Build distribution directory
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          slug="career-mentor-coach"
+
+          rm -rf build
+          mkdir -p "build/$slug"
+          rsync -a --delete --exclude-from=.distignore ./ "build/$slug/"
+
+          test -f "build/$slug/style.css"
+          test -f "build/$slug/readme.txt"
+          test -f "build/$slug/patterns/pattern-career-roadmap-process.php"
+
+      - name: Commit version directory to WordPress.org SVN
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SVN_USERNAME:-}" ] || [ -z "${SVN_PASSWORD:-}" ]; then
+            echo "SVN_USERNAME and SVN_PASSWORD GitHub secrets are required." >&2
+            exit 1
+          fi
+
+          slug="career-mentor-coach"
+          version="$RELEASE_VERSION"
+          svn_url="https://themes.svn.wordpress.org/$slug"
+
+          rm -rf svn-wc
+          svn checkout "$svn_url" svn-wc
+
+          if [ -d "svn-wc/$version" ]; then
+            echo "SVN version directory already exists: $version" >&2
+            exit 1
+          fi
+
+          latest_version="$(find svn-wc -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
+
+          if [ -n "$latest_version" ]; then
+            svn cp "svn-wc/$latest_version" "svn-wc/$version"
+            rsync -a --delete "build/$slug/" "svn-wc/$version/"
+          else
+            mkdir -p "svn-wc/$version"
+            rsync -a --delete "build/$slug/" "svn-wc/$version/"
+            svn add "svn-wc/$version"
+          fi
+
+          svn add --force "svn-wc/$version"
+          svn status svn-wc
+
+          svn commit svn-wc \
+            --message "Deploy $slug $version" \
+            --username "$SVN_USERNAME" \
+            --password "$SVN_PASSWORD" \
+            --no-auth-cache \
+            --non-interactive \
+            --trust-server-cert
