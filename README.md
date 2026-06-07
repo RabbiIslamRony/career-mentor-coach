@@ -6,8 +6,9 @@ Official WordPress.org theme page: https://wordpress.org/themes/career-mentor-co
 
 ## Current Release
 
-- WordPress.org version: `1.0.1`
+- Repository release target: `1.0.2`
 - Required WordPress version: `6.9`
+- Tested up to WordPress: `7.0`
 - Required PHP version: `7.4`
 - Text domain: `career-mentor-coach`
 
@@ -32,15 +33,22 @@ Official WordPress.org theme page: https://wordpress.org/themes/career-mentor-co
 ## Releases
 
 The repository includes a GitHub Actions workflow that builds a clean WordPress theme ZIP whenever a version tag is pushed.
+The workflow syncs the packaged theme version from the tag name, so a `vX.Y.Z` tag produces a ZIP with `Version: X.Y.Z` and `Stable tag: X.Y.Z`.
 
-Use this pattern for the next release:
+The GitHub release ZIP still needs to be submitted to WordPress.org through the theme update workflow unless a separate WordPress.org SVN deployment workflow is configured with secure credentials.
+
+The `v1.0.2` tag already exists in this repository. Do not delete, recreate, or push release tags until the maintainer confirms the release path.
+
+Use this pattern for future confirmed releases:
 
 ```bash
 git add .
-git commit -m "Prepare release 1.0.2"
-git tag -a v1.0.2 -m "Career Mentor Coach 1.0.2"
-git push origin main v1.0.2
+git commit -m "Prepare release X.Y.Z"
+git tag -a vX.Y.Z -m "Career Mentor Coach X.Y.Z"
+git push origin main vX.Y.Z
 ```
+
+Do not create or push the release tag until the maintainer confirms the release is ready.
 
 The release ZIP excludes development-only files using `.distignore`.
 

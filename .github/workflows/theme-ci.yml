@@ -1,0 +1,92 @@
+name: Theme quality checks
+
+on:
+  push:
+    branches:
+      - main
+      - "codex/**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: PHP lint
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          while IFS= read -r -d '' file; do
+            php -l "$file"
+          done < <(find . -path ./.git -prune -o -name '*.php' -print0)
+
+      - name: Parse JSON files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          while IFS= read -r -d '' file; do
+            php -r '
+              $file = $argv[1];
+              json_decode(file_get_contents($file));
+              if (JSON_ERROR_NONE !== json_last_error()) {
+                fwrite(STDERR, $file . ": " . json_last_error_msg() . PHP_EOL);
+                exit(1);
+              }
+            ' "$file"
+          done < <(find . -path ./.git -prune -o -name '*.json' -print0)
+
+      - name: Check WordPress release metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          style_version="$(awk -F': ' '/^Version:/ { print $2; exit }' style.css)"
+          rtl_version="$(awk -F': ' '/^Version:/ { print $2; exit }' style-rtl.css)"
+          stable_tag="$(awk -F': ' '/^Stable tag:/ { print $2; exit }' readme.txt)"
+          required_wp="$(awk -F': ' '/^Requires at least:/ { print $2; exit }' style.css)"
+          tested_wp="$(awk -F': ' '/^Tested up to:/ { print $2; exit }' style.css)"
+          readme_tested_wp="$(awk -F': ' '/^Tested up to:/ { print $2; exit }' readme.txt)"
+
+          test "$style_version" = "$rtl_version"
+          test "$style_version" = "$stable_tag"
+          test "$required_wp" = "6.9"
+          test "$tested_wp" = "7.0"
+          test "$readme_tested_wp" = "7.0"
+
+      - name: Check review feedback regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ! grep -R -n -E 'option_blogname|option_blogdescription|get_custom_logo|Assets_Manager|assets-manager' functions.php inc parts patterns styles templates assets theme.json style.css style-rtl.css readme.txt
+          grep -q 'href="#content"' patterns/pattern-header.php
+
+          for template in templates/*.html; do
+            grep -q 'id="content"' "$template"
+          done
+
+      - name: Package smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          slug="career-mentor-coach"
+          version="$(awk -F': ' '/^Version:/ { print $2; exit }' style.css)"
+          zip_name="${slug}.${version}.zip"
+
+          rm -rf dist "$zip_name"
+          mkdir -p "dist/$slug"
+          rsync -a --delete --exclude-from=.distignore ./ "dist/$slug/"
+          (cd dist && zip -qr "../$zip_name" "$slug")
+
+          unzip -l "$zip_name" | grep -q "$slug/style.css"
+          unzip -l "$zip_name" | grep -q "$slug/readme.txt"
+          ! unzip -l "$zip_name" | grep -q "$slug/.github/"
