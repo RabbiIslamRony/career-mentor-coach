@@ -44,6 +44,8 @@ jobs:
           grep -q '^Requires at least: 6.9$' style.css
           grep -q '^Tested up to: 7.0$' style.css
           grep -q '^Tested up to: 7.0$' readme.txt
+          ! grep -q '^Theme URI: https://wordpress.org/themes/' style.css
+          grep -qi 'copyright' style.css
           ! grep -R -n -E 'option_blogname|option_blogdescription|get_custom_logo|Assets_Manager|assets-manager' functions.php inc parts patterns styles templates assets theme.json style.css style-rtl.css readme.txt
           grep -q 'href="#content"' patterns/pattern-header.php
 

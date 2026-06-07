@@ -48,7 +48,7 @@ Required GitHub repository secrets:
 - `SVN_USERNAME`: WordPress.org username with commit access to the theme.
 - `SVN_PASSWORD`: WordPress.org password for that account.
 
-For the current WordPress.org release target, run the workflow manually with version `1.0.2`. For future releases, merge the release commit to `main`, tag the version, and the workflow can deploy the matching version directory to SVN.
+For the current WordPress.org release target, run the workflow manually with version `1.0.2`. If WordPress.org import fails before publishing, the workflow can re-commit fixes to the same version directory. For future approved releases, merge the release commit to `main`, tag the version, and deploy the matching version directory to SVN.
 
 Use this pattern for future confirmed releases:
 

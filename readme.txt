@@ -32,7 +32,7 @@ Perfect for:
 == Changelog ==
 
 = 1.0.2 =
-* Added the official WordPress.org theme URI.
+* Updated theme metadata for WordPress.org review.
 * Added GitHub contribution documentation.
 * Added six reusable career coaching block patterns.
 * Added career roadmap, lead magnet, case study, package comparison, FAQ, and trust strip layouts.
@@ -48,7 +48,7 @@ Perfect for:
 
 == Copyright ==
 
-Career Mentor Coach WordPress Theme, (C) 2026 ronya4927
+Career Mentor Coach WordPress Theme, Copyright 2026 ronya4927
 Career Mentor Coach is distributed under the terms of the GNU GPL.
 
 This program is free software: you can redistribute it and/or modify

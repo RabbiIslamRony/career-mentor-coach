@@ -60,6 +60,8 @@ jobs:
           test "$required_wp" = "6.9"
           test "$tested_wp" = "7.0"
           test "$readme_tested_wp" = "7.0"
+          ! grep -q '^Theme URI: https://wordpress.org/themes/' style.css
+          grep -qi 'copyright' style.css
 
       - name: Check review feedback regressions
         shell: bash
