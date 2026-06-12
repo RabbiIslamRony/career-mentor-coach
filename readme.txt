@@ -5,7 +5,7 @@ Tags: blog, portfolio, education, full-site-editing, block-patterns, block-style
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,10 @@ Perfect for:
 3. Click Activate to use your new theme right away.
 
 == Changelog ==
+
+= 1.0.3 =
+* Re-published the WordPress.org update with corrected theme metadata.
+* Confirmed stylesheet copyright notice and non-reserved theme URI handling.
 
 = 1.0.2 =
 * Updated theme metadata for WordPress.org review.
